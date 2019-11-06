@@ -1,4 +1,4 @@
-package lib
+package model
 
 import (
 	"github.com/go-redis/redis/v7"

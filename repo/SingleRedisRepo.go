@@ -2,23 +2,27 @@ package repo
 
 import (
 	"github.com/go-redis/redis/v7"
-	"restful-redis-manager/lib"
+	"restful-redis-manager/model"
 )
 
-func GetStringByKey(key string, options map[string]interface{}) string {
+type InputSource struct {
+	Addr     string `json:"Addr"`
+	Password string `json:"Password"`
+	DB       int    `json:"DB"`
+}
+
+func GetStringByKey(key string, options *InputSource) string {
 	sr := fetchClient(options)
 	return sr.Client.Get(key).String()
 }
 
-func fetchClient(options map[string]interface{}) *lib.SingleResource {
-	sr := lib.NewSingleResource()
+func fetchClient(options *InputSource) *model.SingleResource {
+	sr := model.NewSingleResource()
 	rOptions := &redis.Options{
-		Addr:     options["Addr"].(string),
-		Password: options["Password"].(string),
-		DB:       options["DB"].(int),
+		Addr:     options.Addr,
+		Password: options.Password,
+		DB:       options.DB,
 	}
 	sr.SetSingleClient(rOptions)
 	return sr
 }
-
-

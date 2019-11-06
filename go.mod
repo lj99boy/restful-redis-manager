@@ -3,7 +3,7 @@ module restful-redis-manager
 go 1.12
 
 require (
-	github.com/go-redis/redis/v7 v7.0.0-beta.4 // indirect
+	github.com/go-redis/redis/v7 v7.0.0-beta.4
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/onsi/ginkgo v1.10.3 // indirect
 	github.com/onsi/gomega v1.7.1 // indirect

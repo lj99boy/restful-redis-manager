@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"restful-redis-manager/repo"
@@ -8,15 +9,19 @@ import (
 
 func StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
-	if method != "GET" {
-		fmt.Fprintf(w, "only get")
-	}
 
-	if reqSource := r.URL.Query()["source"]; reqSource == nil {
-		fmt.Fprintf(w, repo.GetStringByKey("miao", nil))
-	} else {
-		fmt.Fprintf(w, repo.GetStringByKey("miao", reqSource))
-	}
+	reqSource := r.URL.Query()["source"][0]
+	key := r.URL.Query()["key"][0]
 
-	fmt.Fprintf(w, "thx")
+	switch method {
+	case "GET":
+		if reqSource == "" || key == "" {
+			fmt.Fprintf(w, "nil source")
+		} else {
+			inputSource := &repo.InputSource{}
+			json.Unmarshal([]byte(reqSource), inputSource)
+			val := repo.GetStringByKey(key, inputSource)
+			fmt.Fprintf(w, val)
+		}
+	}
 }
