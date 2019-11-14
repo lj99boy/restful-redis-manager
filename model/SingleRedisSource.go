@@ -11,11 +11,6 @@ type SingleResource struct {
 func NewSingleResource() *SingleResource {
 	return &SingleResource{}
 }
-
-func (rs *SingleResource) NewSingleClient(options *redis.Options) {
-	rs.Client = redis.NewClient(options)
-}
-
 //todo 这里需要传入redis.Options 调用的地方还是耦合了option
 func (rs *SingleResource) SetSingleClient(options *redis.Options) {
 	if rs.Client != nil {

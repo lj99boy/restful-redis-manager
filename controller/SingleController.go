@@ -52,8 +52,8 @@ func StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func convertJsonStrToSource(reqSource string) (*repo.InputSource, error) {
-	inputSource := &repo.InputSource{}
+func convertJsonStrToSource(reqSource string) (*repo.SingleInputSource, error) {
+	inputSource := &repo.SingleInputSource{}
 	err := json.Unmarshal([]byte(reqSource), inputSource)
 	if err != nil {
 		return nil, err

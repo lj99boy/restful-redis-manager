@@ -6,18 +6,18 @@ import (
 	"restful-redis-manager/model"
 )
 
-type InputSource struct {
+type SingleInputSource struct {
 	Addr     string `json:"Addr"`
 	Password string `json:"Password"`
 	DB       int    `json:"DB"`
 }
 
-func GetStringByKey(key string, options *InputSource) string {
+func GetStringByKey(key string, options *SingleInputSource) string {
 	sr := fetchClient(options)
 	return sr.Client.Get(key).Val()
 }
 
-func SetStrings(options *InputSource, key string, val string) bool {
+func SetStrings(options *SingleInputSource, key string, val string) bool {
 	sr := fetchClient(options)
 
 	res := sr.Client.Set(key, val, 0)
@@ -30,7 +30,7 @@ func SetStrings(options *InputSource, key string, val string) bool {
 	}
 }
 
-func fetchClient(options *InputSource) *model.SingleResource {
+func fetchClient(options *SingleInputSource) *model.SingleResource {
 	sr := model.NewSingleResource()
 	rOptions := &redis.Options{
 		Addr:     options.Addr,
