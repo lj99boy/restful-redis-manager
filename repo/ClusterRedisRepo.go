@@ -11,13 +11,25 @@ type ClusterInputSource struct {
 	Password string   `json:"Password"`
 }
 
-func GetCStringByKey(options *ClusterInputSource, key string) string {
-	sr := fetchClusterSource(options)
+var crr *ClusterRedisRepo
+
+type ClusterRedisRepo struct {
+}
+
+func FetchClusterRedisRepo() *ClusterRedisRepo {
+	if crr == nil {
+		crr = &ClusterRedisRepo{}
+	}
+	return crr
+}
+
+func (crr *ClusterRedisRepo) GetStringByKey(options *ClusterInputSource, key string) string {
+	sr := crr.fetchSource(options)
 	return sr.Client.Get(key).Val()
 }
 
-func SetCStrings(options *ClusterInputSource, key string, val string) bool {
-	sr := fetchClusterSource(options)
+func (crr *ClusterRedisRepo) SetStrings(options *ClusterInputSource, key string, val string) bool {
+	sr := crr.fetchSource(options)
 	res := sr.Client.Set(key, val, 0)
 	err := res.Err()
 	if err != nil {
@@ -28,12 +40,12 @@ func SetCStrings(options *ClusterInputSource, key string, val string) bool {
 	}
 }
 
-func fetchClusterSource(options *ClusterInputSource) *model.ClusterSource {
-	sr := model.NewClusterSource()
+func (crr *ClusterRedisRepo) fetchSource(options *ClusterInputSource) *model.ClusterRedisSource {
+	sr := model.FetchClusterRedisSource()
 	rOptions := &redis.ClusterOptions{
 		Addrs:    options.Addrs,
 		Password: options.Password,
 	}
-	sr.SetClusterClient(rOptions)
+	sr.SetClient(rOptions)
 	return sr
 }

@@ -4,15 +4,20 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
-type SingleResource struct {
+var srs *SingleRedisSource
+
+type SingleRedisSource struct {
 	Client *redis.Client
 }
 
-func NewSingleResource() *SingleResource {
-	return &SingleResource{}
+func FetchSingleRedisSource() *SingleRedisSource {
+	if srs == nil {
+		srs = &SingleRedisSource{}
+	}
+	return srs
 }
 //todo 这里需要传入redis.Options 调用的地方还是耦合了option
-func (rs *SingleResource) SetSingleClient(options *redis.Options) {
+func (rs *SingleRedisSource) SetClient(options *redis.Options) {
 	if rs.Client != nil {
 		rs.Client.Close()
 	}

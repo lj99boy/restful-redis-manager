@@ -1,13 +1,26 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"restful-redis-manager/repo"
 )
 
-func CStringsHandleFunc(w http.ResponseWriter, r *http.Request) {
+var cc *ClusterController
+
+type ClusterController struct {
+}
+
+func FetchClusterController() *ClusterController {
+	if cc == nil {
+		cc = &ClusterController{}
+	}
+	return cc
+}
+
+func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 
 	reqSource := r.URL.Query().Get("source")
@@ -30,7 +43,7 @@ func CStringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		val := repo.GetStringByKey(key, inputSource)
+		val := repo.FetchClusterRedisRepo().GetStringByKey(inputSource, key)
 		fmt.Fprintf(w, val)
 	case "PUT":
 		if reqSource == "" || key == "" || val == "" {
@@ -47,6 +60,16 @@ func CStringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		repo.SetStrings(inputSource, key, val)
+		repo.FetchClusterRedisRepo().SetStrings(inputSource, key, val)
+	}
+}
+
+func convertJsonStrToSource(reqSource string) (*repo.ClusterInputSource, error) {
+	inputSource := &repo.ClusterInputSource{}
+	err := json.Unmarshal([]byte(reqSource), inputSource)
+	if err != nil {
+		return nil, err
+	} else {
+		return inputSource, nil
 	}
 }

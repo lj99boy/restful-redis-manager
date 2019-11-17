@@ -5,10 +5,11 @@ import (
 	"restful-redis-manager/controller"
 )
 
-func main()  {
+func main() {
 	muxHandler := http.NewServeMux()
-	muxHandler.HandleFunc("/single/strings",controller.StringsHandleFunc)
-	muxHandler.HandleFunc("/cluster/strings",controller.CStringsHandleFunc)
+	muxHandler.HandleFunc("/single/strings", controller.FetchSingleController().StringsHandleFunc)
+	muxHandler.HandleFunc("/single/keys", controller.FetchSingleController().KeysHandleFunc)
+	muxHandler.HandleFunc("/cluster/strings", controller.FetchClusterController().StringsHandleFunc)
 
-	http.ListenAndServe(":4777",muxHandler)
+	http.ListenAndServe(":4777", muxHandler)
 }
