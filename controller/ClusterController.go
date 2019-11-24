@@ -20,6 +20,33 @@ func FetchClusterController() *ClusterController {
 	return cc
 }
 
+func (cc *ClusterController) KeysHandleFunc(w http.ResponseWriter, r *http.Request) {
+	method := r.Method
+
+	reqSource := r.URL.Query().Get("source")
+	key := r.URL.Query().Get("key")
+
+	if reqSource == "" || key == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "nil source")
+		return
+	}
+
+	switch method {
+	case "GET":
+		inputSource, err := cc.convertJsonStrToSource(reqSource)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "invalid request")
+			return
+		}
+
+		val := repo.FetchClusterRedisRepo().GetKeys(inputSource, key)
+		fmt.Fprintf(w, val)
+	}
+}
+
 func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 
@@ -35,7 +62,7 @@ func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		inputSource, err := convertJsonStrToSource(reqSource)
+		inputSource, err := cc.convertJsonStrToSource(reqSource)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -52,7 +79,7 @@ func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		inputSource, err := convertJsonStrToSource(reqSource)
+		inputSource, err := cc.convertJsonStrToSource(reqSource)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -64,7 +91,7 @@ func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func convertJsonStrToSource(reqSource string) (*repo.ClusterInputSource, error) {
+func (cc *ClusterController) convertJsonStrToSource(reqSource string) (*repo.ClusterInputSource, error) {
 	inputSource := &repo.ClusterInputSource{}
 	err := json.Unmarshal([]byte(reqSource), inputSource)
 	if err != nil {

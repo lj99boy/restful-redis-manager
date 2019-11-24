@@ -25,6 +25,18 @@ func FetchSingleRedisRepo() *SingleRedisRepo {
 	return srr
 }
 
+func (srr *SingleRedisRepo) DeleteByKey(options *SingleInputSource, key string) int64 {
+	sr := srr.fetchSource(options)
+
+	res, err := sr.Client.Del(key).Result()
+	if err != nil {
+		log.Println(err)
+		return -1
+	} else {
+		return res
+	}
+}
+
 func (srr *SingleRedisRepo) GetStringByKey(options *SingleInputSource, key string) string {
 	sr := srr.fetchSource(options)
 
@@ -34,7 +46,7 @@ func (srr *SingleRedisRepo) GetStringByKey(options *SingleInputSource, key strin
 func (srr *SingleRedisRepo) GetKeys(options *SingleInputSource, key string) string {
 	sr := srr.fetchSource(options)
 	val := sr.Client.Do("keys", key).Val()
-	jsonStr,_ := json.Marshal(val)
+	jsonStr, _ := json.Marshal(val)
 	return string(jsonStr)
 }
 

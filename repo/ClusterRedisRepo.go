@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"encoding/json"
 	"github.com/go-redis/redis/v7"
 	"log"
 	"restful-redis-manager/model"
@@ -21,6 +22,14 @@ func FetchClusterRedisRepo() *ClusterRedisRepo {
 		crr = &ClusterRedisRepo{}
 	}
 	return crr
+}
+
+
+func (crr *ClusterRedisRepo) GetKeys(options *ClusterInputSource, key string) string {
+	sr := crr.fetchSource(options)
+	val := sr.Client.Do("keys", key).Val()
+	jsonStr,_ := json.Marshal(val)
+	return string(jsonStr)
 }
 
 func (crr *ClusterRedisRepo) GetStringByKey(options *ClusterInputSource, key string) string {

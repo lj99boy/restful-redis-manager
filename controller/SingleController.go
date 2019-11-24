@@ -31,29 +31,41 @@ func (sc *SingleController) KeysHandleFunc(w http.ResponseWriter, r *http.Reques
 		fmt.Fprintf(w, "nil source")
 		return
 	}
+	inputSource, err := sc.convertJsonStrToSource(reqSource)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "invalid request")
+		return
+	}
 
 	switch method {
 	case "GET":
-		inputSource, err := sc.convertJsonStrToSource(reqSource)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "invalid request")
-			return
-		}
-
 		val := repo.FetchSingleRedisRepo().GetKeys(inputSource, key)
 		fmt.Fprintf(w, val)
+	case "DELETE":
+		res := repo.FetchSingleRedisRepo().DeleteByKey(inputSource, key)
+		if res != -1 {
+			fmt.Fprintf(w, key)
+		} else {
+			fmt.Fprintf(w, "-1")
+		}
 	}
-
 }
 
 func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
-
 	reqSource := r.URL.Query().Get("source")
 	key := r.URL.Query().Get("key")
 	val := r.URL.Query().Get("val")
+
+	inputSource, err := sc.convertJsonStrToSource(reqSource)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "invalid request")
+		return
+	}
 
 	switch method {
 	case "GET":
@@ -62,15 +74,6 @@ func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Req
 			fmt.Fprintf(w, "nil source")
 			return
 		}
-
-		inputSource, err := sc.convertJsonStrToSource(reqSource)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "invalid request")
-			return
-		}
-
 		val := repo.FetchSingleRedisRepo().GetStringByKey(inputSource, key)
 		fmt.Fprintf(w, val)
 	case "PUT":
@@ -79,15 +82,6 @@ func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Req
 			fmt.Fprintf(w, "invalid request")
 			return
 		}
-
-		inputSource, err := sc.convertJsonStrToSource(reqSource)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "invalid request")
-			return
-		}
-
 		repo.FetchSingleRedisRepo().SetStrings(inputSource, key, val)
 	}
 }
