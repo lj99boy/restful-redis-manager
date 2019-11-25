@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis/v7"
 	"log"
 	"restful-redis-manager/model"
+	"time"
 )
 
 type SingleInputSource struct {
@@ -23,6 +24,18 @@ func FetchSingleRedisRepo() *SingleRedisRepo {
 		srr = &SingleRedisRepo{}
 	}
 	return srr
+}
+
+func (srr *SingleRedisRepo) ExpireKey(options *SingleInputSource, key string, val int64) int64 {
+	sr := srr.fetchSource(options)
+
+	res, err := sr.Client.Expire(key, time.Duration(val)).Result()
+	if err != nil {
+		log.Println(err)
+		return -1
+	} else {
+		return res
+	}
 }
 
 func (srr *SingleRedisRepo) DeleteByKey(options *SingleInputSource, key string) int64 {

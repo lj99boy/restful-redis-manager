@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"restful-redis-manager/repo"
+	"strconv"
 )
 
 var sc *SingleController
@@ -50,7 +51,28 @@ func (sc *SingleController) KeysHandleFunc(w http.ResponseWriter, r *http.Reques
 		} else {
 			fmt.Fprintf(w, "-1")
 		}
+	case "POST":
+		action := r.URL.Query().Get("action")
+		val := r.URL.Query().Get("val")
+		if action == "" || val == "" {
+			fmt.Fprintf(w, "invalid request")
+		}
+		switch action {
+		case "expire":
+			val, _ := strconv.ParseInt(val, 0, 64)
+			res := repo.FetchSingleRedisRepo().ExpireKey(inputSource, key, val)
+		}
 	}
+}
+
+func HashHandleFunc(w http.ResponseWriter, r *http.Request) {
+	method := r.Method
+	reqSource := r.URL.Query().Get("source")
+	key := r.URL.Query().Get("key")
+	val := r.URL.Query().Get("val")
+	inputSource, err := sc.convertJsonStrToSource(reqSource)
+
+
 }
 
 func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
