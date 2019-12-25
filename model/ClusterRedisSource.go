@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/go-redis/redis/v7"
+	"restful-redis-manager/ParamDict"
 )
 
 var crs *ClusterRedisSource
@@ -17,10 +18,15 @@ func FetchClusterRedisSource() *ClusterRedisSource {
 	return crs
 }
 
-//todo 这里需要传入redis.Options 调用的地方还是耦合了redis option
-func (rs *ClusterRedisSource) SetClient(options *redis.ClusterOptions) {
+func (rs *ClusterRedisSource) SetClient(options *ParamDict.ClusterInputSource) {
+	rOptions := &redis.ClusterOptions{
+		Addrs:    options.Addrs,
+		Password: options.Password,
+	}
+
 	if rs.Client != nil {
 		rs.Client.Close()
 	}
-	rs.Client = redis.NewClusterClient(options)
+
+	rs.Client = redis.NewClusterClient(rOptions)
 }

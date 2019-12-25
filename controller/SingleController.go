@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"restful-redis-manager/ParamDict"
 	"restful-redis-manager/repo"
 	"strconv"
 )
@@ -23,22 +24,21 @@ func FetchSingleController() *SingleController {
 
 func (sc *SingleController) KeysHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
-
 	reqSource := r.URL.Query().Get("source")
 	key := r.URL.Query().Get("key")
 
-	if reqSource == "" || key == "" {
+	if key == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "nil source")
 		return
 	}
 	inputSource, err := sc.convertJsonStrToSource(reqSource)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "invalid request")
-		return
-	}
+	//if err != nil {
+	//	log.Println(err)
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	fmt.Fprintf(w, "invalid request")
+	//	return
+	//}
 
 	switch method {
 	case "GET":
@@ -61,19 +61,44 @@ func (sc *SingleController) KeysHandleFunc(w http.ResponseWriter, r *http.Reques
 		case "expire":
 			val, _ := strconv.ParseInt(val, 0, 64)
 			res := repo.FetchSingleRedisRepo().ExpireKey(inputSource, key, val)
+			fmt.Fprintf(w, "%v", res)
 		}
 	}
 }
 
-func HashHandleFunc(w http.ResponseWriter, r *http.Request) {
-	method := r.Method
-	reqSource := r.URL.Query().Get("source")
-	key := r.URL.Query().Get("key")
-	val := r.URL.Query().Get("val")
-	inputSource, err := sc.convertJsonStrToSource(reqSource)
-
-
-}
+//func HashHandleFunc(w http.ResponseWriter, r *http.Request) {
+//	method := r.Method
+//	reqSource := r.URL.Query().Get("source")
+//	key := r.URL.Query().Get("key")
+//	field := r.URL.Query().Get("field")
+//	action := r.URL.Query().Get("action")
+//	inputSource, err := sc.convertJsonStrToSource(reqSource)
+//
+//	switch method {
+//	case "GET":
+//		if key == "" {
+//			w.WriteHeader(http.StatusBadRequest)
+//			fmt.Fprintf(w, "nil source")
+//			return
+//		}
+//		switch action {
+//		case "hget":
+//			val := repo.FetchSingleRedisRepo().Hget(inputSource, key, field)
+//			fmt.Fprintf(w, val)
+//			//field: field1 field2
+//		case "hmget":
+//			val := repo.FetchSingleRedisRepo().Hget(inputSource, key, field)
+//			fmt.Fprintf(w, val)
+//		}
+//	case "PUT":
+//		if key == "" || val == "" {
+//			w.WriteHeader(http.StatusBadRequest)
+//			fmt.Fprintf(w, "invalid request")
+//			return
+//		}
+//		repo.FetchSingleRedisRepo().SetStrings(inputSource, key, val)
+//	}
+//}
 
 func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
@@ -91,7 +116,7 @@ func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Req
 
 	switch method {
 	case "GET":
-		if reqSource == "" || key == "" {
+		if key == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "nil source")
 			return
@@ -99,7 +124,7 @@ func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Req
 		val := repo.FetchSingleRedisRepo().GetStringByKey(inputSource, key)
 		fmt.Fprintf(w, val)
 	case "PUT":
-		if reqSource == "" || key == "" || val == "" {
+		if key == "" || val == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "invalid request")
 			return
@@ -108,8 +133,8 @@ func (sc *SingleController) StringsHandleFunc(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (sc *SingleController) convertJsonStrToSource(reqSource string) (*repo.SingleInputSource, error) {
-	inputSource := &repo.SingleInputSource{}
+func (sc *SingleController) convertJsonStrToSource(reqSource string) (*ParamDict.SingleInputSource, error) {
+	inputSource := &ParamDict.SingleInputSource{}
 	err := json.Unmarshal([]byte(reqSource), inputSource)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"restful-redis-manager/ParamDict"
 	"restful-redis-manager/repo"
 )
 
@@ -91,8 +92,8 @@ func (cc *ClusterController) StringsHandleFunc(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (cc *ClusterController) convertJsonStrToSource(reqSource string) (*repo.ClusterInputSource, error) {
-	inputSource := &repo.ClusterInputSource{}
+func (cc *ClusterController) convertJsonStrToSource(reqSource string) (*ParamDict.ClusterInputSource, error) {
+	inputSource := &ParamDict.ClusterInputSource{}
 	err := json.Unmarshal([]byte(reqSource), inputSource)
 	if err != nil {
 		return nil, err

@@ -2,17 +2,12 @@ package repo
 
 import (
 	"encoding/json"
-	"github.com/go-redis/redis/v7"
 	"log"
+	"restful-redis-manager/ParamDict"
 	"restful-redis-manager/model"
 	"time"
 )
 
-type SingleInputSource struct {
-	Addr     string `json:"Addr"`
-	Password string `json:"Password"`
-	DB       int    `json:"DB"`
-}
 
 var srr *SingleRedisRepo
 
@@ -26,19 +21,19 @@ func FetchSingleRedisRepo() *SingleRedisRepo {
 	return srr
 }
 
-func (srr *SingleRedisRepo) ExpireKey(options *SingleInputSource, key string, val int64) int64 {
+func (srr *SingleRedisRepo) ExpireKey(options *ParamDict.SingleInputSource, key string, val int64) int64 {
 	sr := srr.fetchSource(options)
 
-	res, err := sr.Client.Expire(key, time.Duration(val)).Result()
+	_, err := sr.Client.Expire(key, time.Duration(val)).Result()
 	if err != nil {
 		log.Println(err)
 		return -1
 	} else {
-		return res
+		return 0
 	}
 }
 
-func (srr *SingleRedisRepo) DeleteByKey(options *SingleInputSource, key string) int64 {
+func (srr *SingleRedisRepo) DeleteByKey(options *ParamDict.SingleInputSource, key string) int64 {
 	sr := srr.fetchSource(options)
 
 	res, err := sr.Client.Del(key).Result()
@@ -50,20 +45,32 @@ func (srr *SingleRedisRepo) DeleteByKey(options *SingleInputSource, key string) 
 	}
 }
 
-func (srr *SingleRedisRepo) GetStringByKey(options *SingleInputSource, key string) string {
+func (srr *SingleRedisRepo) Hget(options *ParamDict.SingleInputSource, key string, field string) string {
+	sr := srr.fetchSource(options)
+
+	return sr.Client.HGet(key, field).Val()
+}
+
+//func (srr *SingleRedisRepo) Hmget(options *ParamDict.SingleInputSource, key string, field string) string {
+//	sr := srr.fetchSource(options)
+//
+	//return sr.Client.HMGet(key, ).Val()
+//}
+
+func (srr *SingleRedisRepo) GetStringByKey(options *ParamDict.SingleInputSource, key string) string {
 	sr := srr.fetchSource(options)
 
 	return sr.Client.Get(key).Val()
 }
 
-func (srr *SingleRedisRepo) GetKeys(options *SingleInputSource, key string) string {
+func (srr *SingleRedisRepo) GetKeys(options *ParamDict.SingleInputSource, key string) string {
 	sr := srr.fetchSource(options)
 	val := sr.Client.Do("keys", key).Val()
 	jsonStr, _ := json.Marshal(val)
 	return string(jsonStr)
 }
 
-func (srr *SingleRedisRepo) SetStrings(options *SingleInputSource, key string, val string) bool {
+func (srr *SingleRedisRepo) SetStrings(options *ParamDict.SingleInputSource, key string, val string) bool {
 	sr := srr.fetchSource(options)
 
 	res := sr.Client.Set(key, val, 0)
@@ -76,13 +83,12 @@ func (srr *SingleRedisRepo) SetStrings(options *SingleInputSource, key string, v
 	}
 }
 
-func (srr *SingleRedisRepo) fetchSource(options *SingleInputSource) *model.SingleRedisSource {
-	sr := model.FetchSingleRedisSource()
-	rOptions := &redis.Options{
-		Addr:     options.Addr,
-		Password: options.Password,
-		DB:       options.DB,
+func (srr *SingleRedisRepo) fetchSource(options *ParamDict.SingleInputSource) *model.SingleRedisSource {
+	if options == nil {
+		options = GetSingleDefaultService()
 	}
-	sr.SetClient(rOptions)
+	sr := model.FetchSingleRedisSource()
+	sr.SetClient(options)
 	return sr
+
 }

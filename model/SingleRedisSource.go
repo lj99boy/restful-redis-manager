@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/go-redis/redis/v7"
+	"restful-redis-manager/ParamDict"
 )
 
 var srs *SingleRedisSource
@@ -16,12 +17,16 @@ func FetchSingleRedisSource() *SingleRedisSource {
 	}
 	return srs
 }
-//todo 这里需要传入redis.Options 调用的地方还是耦合了option
-func (rs *SingleRedisSource) SetClient(options *redis.Options) {
-	if rs.Client != nil {
-		rs.Client.Close()
+
+func (rs *SingleRedisSource) SetClient(options *ParamDict.SingleInputSource) {
+	rOptions := &redis.Options{
+		Addr:     options.Addr,
+		Password: options.Password,
+		DB:       options.DB,
 	}
-	rs.Client = redis.NewClient(options)
+
+	if rs.Client.Options().Addr != rOptions.Addr {
+		rs.Client.Close()
+		rs.Client = redis.NewClient(rOptions)
+	}
 }
-
-

@@ -2,15 +2,12 @@ package repo
 
 import (
 	"encoding/json"
-	"github.com/go-redis/redis/v7"
 	"log"
+	"restful-redis-manager/ParamDict"
 	"restful-redis-manager/model"
 )
 
-type ClusterInputSource struct {
-	Addrs    []string `json:"Addrs"`
-	Password string   `json:"Password"`
-}
+
 
 var crr *ClusterRedisRepo
 
@@ -24,20 +21,19 @@ func FetchClusterRedisRepo() *ClusterRedisRepo {
 	return crr
 }
 
-
-func (crr *ClusterRedisRepo) GetKeys(options *ClusterInputSource, key string) string {
+func (crr *ClusterRedisRepo) GetKeys(options *ParamDict.ClusterInputSource, key string) string {
 	sr := crr.fetchSource(options)
 	val := sr.Client.Do("keys", key).Val()
-	jsonStr,_ := json.Marshal(val)
+	jsonStr, _ := json.Marshal(val)
 	return string(jsonStr)
 }
 
-func (crr *ClusterRedisRepo) GetStringByKey(options *ClusterInputSource, key string) string {
+func (crr *ClusterRedisRepo) GetStringByKey(options *ParamDict.ClusterInputSource, key string) string {
 	sr := crr.fetchSource(options)
 	return sr.Client.Get(key).Val()
 }
 
-func (crr *ClusterRedisRepo) SetStrings(options *ClusterInputSource, key string, val string) bool {
+func (crr *ClusterRedisRepo) SetStrings(options *ParamDict.ClusterInputSource, key string, val string) bool {
 	sr := crr.fetchSource(options)
 	res := sr.Client.Set(key, val, 0)
 	err := res.Err()
@@ -49,12 +45,11 @@ func (crr *ClusterRedisRepo) SetStrings(options *ClusterInputSource, key string,
 	}
 }
 
-func (crr *ClusterRedisRepo) fetchSource(options *ClusterInputSource) *model.ClusterRedisSource {
+func (crr *ClusterRedisRepo) fetchSource(options *ParamDict.ClusterInputSource) *model.ClusterRedisSource {
 	sr := model.FetchClusterRedisSource()
-	rOptions := &redis.ClusterOptions{
-		Addrs:    options.Addrs,
-		Password: options.Password,
+	if options == nil {
 	}
-	sr.SetClient(rOptions)
+
+	sr.SetClient(options)
 	return sr
 }
