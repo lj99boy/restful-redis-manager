@@ -1,4 +1,4 @@
-package ParamDict
+package paramDict
 
 type ClusterInputSource struct {
 	Addrs    []string `json:"Addrs"`

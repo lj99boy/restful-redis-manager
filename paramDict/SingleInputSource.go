@@ -1,4 +1,4 @@
-package ParamDict
+package paramDict
 
 type SingleInputSource struct {
 	Addr     string `json:"Addr"`
