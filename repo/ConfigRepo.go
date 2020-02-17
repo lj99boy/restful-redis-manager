@@ -1,9 +1,9 @@
 package repo
 
 import (
-	"gopkg.in/yaml.v2"
+	"encoding/json"
 	"io/ioutil"
-	"restful-redis-manager/ParamDict"
+	"restful-redis-manager/paramDict"
 )
 
 //type SingleDefaultConfig struct {
@@ -12,18 +12,40 @@ import (
 //	DB       int    `yaml:"DB"`
 //}
 
-func GetSingleDefaultService() *ParamDict.SingleInputSource {
-	configFileData, err := ioutil.ReadFile("config.yaml")
+func GetClusterDefaultService() *paramDict.ClusterInputSource {
+	configFileData, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		panic(err)
 	}
 
-	t := &ParamDict.SingleInputSource{}
+	jsonContent := struct {
+		Cluster paramDict.ClusterInputSource `json:"Cluster"`
+	}{}
 
-	err = yaml.Unmarshal(configFileData, t)
+	err = json.Unmarshal(configFileData, &jsonContent)
+
 	if err != nil {
 		panic(err)
 	}
 
-	return t
+	return &jsonContent.Cluster
+}
+
+func GetSingleDefaultService() *paramDict.SingleInputSource {
+	configFileData, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		panic(err)
+	}
+
+	jsonContent := struct {
+		Single paramDict.SingleInputSource `json:"Single"`
+	}{}
+
+	err = json.Unmarshal(configFileData, &jsonContent)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return &jsonContent.Single
 }
